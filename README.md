@@ -1,4 +1,5 @@
-# fudje  ![fudge](http://halalsweeties.com/images/images_big/Vanilla-Fudge.png)
+# fudje  
+![fudge](http://halalsweeties.com/images/images_big/Vanilla-Fudge.png)
 
 A tiny Clojure library designed to offer a helping hand when testing. For those familiar with [midje](https://github.com/marick/Midje), 
 you can think of think of this as 'midje-lite'. It provides the majority of features provided my midje, at a fraction of the cost 
