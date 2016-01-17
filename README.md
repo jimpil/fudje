@@ -9,20 +9,18 @@ as you are, not only able to start writing new tests, but also automatically-(is
 
 ## Where
 
-FIXME
+FIXME (leiningen coordinates coming soon)
 
 ## How
 
 * For migrating an existing test ns away from midje, you want to replace `midje.sweet` => `fudje.sweet` in the ns declaration.
 * For writing brand new tests, you probably want something along these lines:
 
-``` 
+```clj 
 (require '[fudje 
            [core :refer [mocking in-background]]
            [sweet :refer :all]])
 ```
-
-FIXME
 
 ## License
 
