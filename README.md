@@ -23,6 +23,10 @@ FIXME (leiningen coordinates coming soon)
            [sweet :refer :all]])
 ```
 
+## Requirements
+
+Clojure 1.7 (or greater) is the only requirement.
+
 ## License
 
 Copyright © 2016 Dimitrios Piliouras

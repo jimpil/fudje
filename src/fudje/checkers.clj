@@ -48,8 +48,7 @@
 (defmethod print-method ContainsChecker [^ContainsChecker v ^Writer w]
   (.write w "(contains ")
   (.write w (pr-str (.content v)))
-  (.write w " ")
-  (.write w ^String (apply str (interpose " " (-> v .opts keys))))
+  (.write w ^String (apply str (interleave (repeat \space) (-> v .opts keys))))
   (.write w ")")
   )
 
@@ -86,8 +85,7 @@
 (defmethod print-method JustChecker [^JustChecker v ^Writer w]
   (.write w "(just ")
   (.write w (pr-str (.content v)))
-  (.write w " ")
-  (.write w ^String (apply str (interpose " " (-> v .opts keys))))
+  (.write w ^String (apply str (interleave (repeat \space) (-> v .opts keys))))
   (.write w ")")
   )
 
