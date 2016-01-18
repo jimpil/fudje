@@ -6,4 +6,8 @@ Fudje was designed to be significantly less 'magical' than midje, and to be AOT 
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/math.combinatorics "0.1.1"  :exclusions [org.clojure]]] ;; avoid  pulling  clj 1.4
-  :aot :all)
+
+  :source-paths ["src/clojure"]
+  :java-source-paths ["src/java"]
+  :aot :all
+  )

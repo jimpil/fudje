@@ -20,7 +20,8 @@
         i
         (recur (inc i) (+ (long (slices i)) sum))))))
 
-(defn plus [x y] (+ x y))
+(defn plus [x y]
+  (+ x y))
 (defn times [x y]
   (reduce plus 0 (repeat x y)))
 

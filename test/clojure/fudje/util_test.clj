@@ -13,3 +13,8 @@
   (is (= [:a :b :c] (find-subset (partition 3 1 [1 2 :a :b :c 3 4 5 6]) [:a :b :c])))
   (is (= nil (find-subset (partition 3 1 [1 2 :a :b  3 :c 4 5 6]) [:a :b :c])))
   )
+
+(deftest find-subset-in-any-order-tests
+  (is (= [:b :a :c] (find-subset-in-any-order (partition 3 1 [1 2 :b :a :c 3 4 5 6]) [:a :b :c])))
+  (is (= nil (find-subset-in-any-order (partition 3 1 [1 2 :a :b  3 :c 4 5 6]) [:a :b :c])))
+  )

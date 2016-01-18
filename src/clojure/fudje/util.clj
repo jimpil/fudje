@@ -61,6 +61,12 @@
             (recur (rest content) (rest potentials) (conj solution fcontent))
             (recur content (rest potentials) solution))))))
 
+(defn find-subset-in-any-order [other-partitions content]
+  (->> content
+       combi/permutations
+       (keep (partial find-subset other-partitions)) ;; this is hard! try out all possible permutations of <content> against all the all possible partitions of <other> - this code branch can be MUCH slower
+       first))
+
 (defn diff-sequential*
   "Helper for uncluttering the ContainsChecker code.
    It does a sensible attempt to diff sequential things a bit more relaxed than what clojure.data/diff does by default,
@@ -71,16 +77,13 @@
     (if ignore-order?
       (if ignore-gaps?
         (data/diff-similar (set content) (set other)) ;; this is easy - just use sets
-        (when (->> content
-                   combi/permutations
-                   (keep (partial find-subset @other-partitions)) ;; this is hard! try out all possible permutations of <content> against all the all possible partitions of <other> - this code branch can be MUCH slower
-                   first)
+        (when (find-subset-in-any-order @other-partitions content)
           [nil nil content]))
       (if ignore-gaps?
         (when (= content (find-subset-without-gaps content other)) ;;this is easy as well
           [nil nil content])
-        (when (= content (find-subset @other-partitions content))
-          [nil nil content]);; this is hard! try out all possible partitions of <other> - this code branch will be SLIGHTLY slower
+        (when (find-subset @other-partitions content) ;; this is hard! try out all possible partitions of <other> - this code branch will be SLIGHTLY slower
+          [nil nil content])
         ))))
 
 
