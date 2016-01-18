@@ -16,5 +16,6 @@
 
 (deftest find-subset-in-any-order-tests
   (is (= [:b :a :c] (find-subset-in-any-order (partition 3 1 [1 2 :b :a :c 3 4 5 6]) [:a :b :c])))
+  (is (= [:c :b :a] (find-subset-in-any-order (partition 3 1 [1 2 :c :b :a 3 4 5 6]) [:a :b :c])))
   (is (= nil (find-subset-in-any-order (partition 3 1 [1 2 :a :b  3 :c 4 5 6]) [:a :b :c])))
   )
