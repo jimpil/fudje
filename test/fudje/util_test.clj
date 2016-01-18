@@ -10,6 +10,6 @@
   )
 
 (deftest find-subset-tests
-  (is (= [nil nil [:a :b :c]] (find-subset (partition 3 1 [1 2 :a :b :c 3 4 5 6]) [:a :b :c])))
+  (is (= [:a :b :c] (find-subset (partition 3 1 [1 2 :a :b :c 3 4 5 6]) [:a :b :c])))
   (is (= nil (find-subset (partition 3 1 [1 2 :a :b  3 :c 4 5 6]) [:a :b :c])))
   )

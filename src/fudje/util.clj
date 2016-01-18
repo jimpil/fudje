@@ -31,13 +31,22 @@
   (.startsWith (str x) "?"))
 
 (defn find-subset
+  "Given the already constructed partitions of <other> (via `(partition (count content) 1 other)`),
+  walk their diffs against <seq-content>, looking for a nil first item (i.e. a successful diff).
+  If one is found, return that partition as the solution."
   [seq-other-partitions seq-content]
-  (->> seq-other-partitions
-       (map (partial data/diff seq-content)) ;; diff them all
-       (some #(when (-> % first empty?) %)))) ;; walk their diffs looking for an empty first element (succesful diff)
+  (some (fn [p]
+          (when (->> p
+                     (data/diff seq-content)
+                     first
+                     nil?) ;; walk their diffs looking for an empty first element (succesful diff)
+            p))
+        seq-other-partitions))
 
 
 (defn find-subset-without-gaps
+  "Given 2 sequential things, find the biggest matching subset of the first into the second,
+  while ignoring intermediate elements."
   [seq-content seq-other]
   (loop [content seq-content
          potentials seq-other
@@ -48,10 +57,9 @@
         (let [fcontent (first content)
               matches? (= fcontent
                           (first potentials))]
-          (recur
-            (cond-> content matches? rest)
-            (rest potentials)
-            (cond-> solution matches? (conj fcontent)))))))
+          (if matches?
+            (recur (rest content) (rest potentials) (conj solution fcontent))
+            (recur content (rest potentials) solution))))))
 
 (defn diff-sequential*
   "Helper for uncluttering the ContainsChecker code.
@@ -63,14 +71,16 @@
     (if ignore-order?
       (if ignore-gaps?
         (data/diff-similar (set content) (set other)) ;; this is easy - just use sets
-        (->> content
-             combi/permutations
-             (keep (partial find-subset @other-partitions)) ;; this is hard! try out all possible permutations of <content> against all the all possible partitions of <other> - this code branch can be MUCH slower
-             first))
+        (when (->> content
+                   combi/permutations
+                   (keep (partial find-subset @other-partitions)) ;; this is hard! try out all possible permutations of <content> against all the all possible partitions of <other> - this code branch can be MUCH slower
+                   first)
+          [nil nil content]))
       (if ignore-gaps?
         (when (= content (find-subset-without-gaps content other)) ;;this is easy as well
           [nil nil content])
-        (find-subset @other-partitions content) ;; this is hard! try out all possible partitions of <other> - this code branch will be SLIGHTLY slower
+        (when (= content (find-subset @other-partitions content))
+          [nil nil content]);; this is hard! try out all possible partitions of <other> - this code branch will be SLIGHTLY slower
         ))))
 
 
