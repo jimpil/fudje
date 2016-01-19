@@ -10,7 +10,8 @@ as you are, not only able to start writing new tests, but also automatically-(is
 
 ## Where
 
-FIXME (leiningen coordinates coming soon)
+Dependency coordinates:
+`[fudje "0.8.0"]`
 
 ## How
 
