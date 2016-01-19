@@ -4,7 +4,7 @@
 ## What
 A tiny (22kb) Clojure library designed to offer a helping hand when testing. For those familiar with [midje](https://github.com/marick/Midje), 
 you can think of think of this as 'midje-lite'. It provides the majority of features provided my midje, at a fraction of the cost 
-(code-bloat, transitive dependencies, AOT issues etc).
+(code-bloat, number of transitive dependencies, AOT issues etc).
 In addition, fudje offers a convenient migration path away from midje, by introducing its own `fact` & `tabular` macros which
 rewrite your existing midje facts into midje-free code (more on this in the intro.md). This allows for smooth & gradual migration, 
 as you are, not only able to start writing new tests, but also automatically-(ish) migrating old ones. 
@@ -13,15 +13,15 @@ as you are, not only able to start writing new tests, but also automatically-(is
 
 This library can (potentially) be of interest to you if:
 
-* You are looking for simple unit-testing library which supports mocking and allows you to write concise tests in a familiar syntax
-* You generally like the features offered by midje (mocking, nesting-checkers etc), but you are not overly thrilled about the syntax it introduces, and therefore wouldn't mind something less magical
-* You are looking for something like midje which can be AOT compiled 
-* You have a large codebase full of midje tests, and for whatever reason, you'd like to migrate away from it (without a full manual rewrite)
+* You are looking for simple unit-testing library which supports mocking and allows you to write concise tests in a familiar syntax.
+* You generally like the features offered by midje (mocking, nesting-checkers etc), but you are not overly thrilled about the syntax/complexity it introduces, and therefore wouldn't mind something less *magical*.
+* You are looking for something like midje which can be AOT compiled. 
+* You have a large codebase full of midje tests, and for whatever reason, you'd like to migrate away from it (without a full manual rewrite).
 
 This library will NOT be of any interest to you if:
 
-* You are perfectly content with vanilla clojure.test, or some other testing library
-* You never liked or appreciated midje, and even the *slightest* resemblance will put you off
+* You are perfectly content with vanilla clojure.test, or some other testing library.
+* You never liked/appreciated midje, and even the **slightest** resemblance will put you off.
 
 
 ## Where
