@@ -1,4 +1,4 @@
-# fudje [![Clojars Project](https://img.shields.io/clojars/v/fudje.svg)](https://clojars.org/fudje) 
+# fudje
 ![fudge](http://halalsweeties.com/images/images_big/Vanilla-Fudge.png)
 
 A tiny Clojure library designed to offer a helping hand when testing. For those familiar with [midje](https://github.com/marick/Midje), 
@@ -9,10 +9,7 @@ rewrite your existing midje facts into midje-free code (more on this in the docs
 as you are, not only able to start writing new tests, but also automatically-(ish) migrating old ones. 
 
 ## Where
-
-
-Dependency coordinates:
-`[fudje "0.8.0"]`
+[![Clojars Project](https://img.shields.io/clojars/v/fudje.svg)](https://clojars.org/fudje) 
 
 ## How
 
