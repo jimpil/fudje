@@ -28,7 +28,7 @@ Obviously, using `mocking` with an empty vector makes little to no sense, but th
 
 ### stubbing VS mocking
 
-Clojure already provides excellent facilities for stubbing (i.e. `with-redefs`). However, for *mocking* a specicif function call with specific arguments, you're left on your own. This is where `mocking` comes to save the day.
+Clojure already provides excellent facilities for stubbing (i.e. `with-redefs`). However, for *mocking* a specific function call with specific arguments, you're left on your own. This is where `mocking` comes to save the day.
  So we've already seen the syntax for `mocking`. A mock is basically a triplet like the following:
  
 ```
