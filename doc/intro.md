@@ -77,7 +77,7 @@ Let's look at one example:
 
 If you can't possibly enumerate the invocations, then you're probably looking for a stub, rather than a mock.
 
-That is it! You now know how to use `mocking`...`in-background` is simply a thinner version of `mocking`, which is something between mocking and stubbing. `in-background` will check the arguments provided but will not do any call-count checking at the end (as opposed to `mocking` which will). 
+That is it! You now know how to use `mocking`...`in-background` is simply a thinner version of `mocking`, which is something between mocking and stubbing. `in-background` will check the arguments provided but will not do any call-count checking at the end (as opposed to `mocking` which will). In other words, you can think of it as a slightly more capable version of `with-redefs`. As such, the intention is for it to surround multiple `mocking` expressions in order to provide mocking for expressions which we don't care how many times they are called. Midje does this via `against-background` and a couple of other variants.  
 
 
 
