@@ -38,6 +38,31 @@ This library will NOT be of any interest to you if:
            [sweet :refer :all]])
 ```
 
+## Example:
+
+```clj
+
+(defn increment [x] 
+  (inc x))
+  
+(defn decrement [x] 
+  (dec x))
+
+
+(mocking [(increment 1) => (decrement 1)
+          (decrement 2) => 3]
+          
+  (is (= 0 (increment 1)))  ;; no failures
+  (is (= 3 (decrement 2)))) ;; no failures
+
+  
+(mocking [(increment 1) => :whatever]        
+  (is (= :whatever (increment 2))))  ;; 2 failures (wrong argument passed + wrong result in assertion `(not= :whatever 3)`) 
+
+```
+
+Please consult the [intro](https://github.com/jimpil/fudje/blob/master/doc/intro.md) for a more comprehensive demo.
+
 ## Requirements
 
 Clojure 1.7 (or greater) is the only requirement.
