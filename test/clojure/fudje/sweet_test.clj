@@ -88,9 +88,9 @@
          ;;following test was copied from  novate.test.random-test
   (tabular ;; complex tabular works
     (fact "wrand returns correct index"
-          (wrand ?weights) => ?index
-          (provided
-            (rand ?sum) => ?rand))
+      (wrand ?weights) => ?index
+        (provided
+          (rand ?sum) => ?rand))
     ?weights      ?sum ?rand ?index
     [3 6 7 12 15] 43   1     0
     [3 6 7 12 15] 43   3     1

@@ -121,5 +121,95 @@ Some short examples:
 
  Please have a look at the test checkers-test.clj namespace for more demo usage.
 
+We're done! You now know how to use fudje...I hope you find it useful!
 
-### Migrating existing midje `fact`s
+### Migrating existing midje facts
+
+Fudje is able to automatically rewrite a **well-formed** midje fact, via its own `fact` macro, so, in theory, you should be able to get rid of the midje dependency of a project, by simply replacing `midje.sweet` => `fudje.sweet` in all its test ns declarations. Now, why 'well-formed' and why 'in-theory'? Let's first look at what constitutes a 'well-formed' midje fact (according to fudje). Here is one:
+
+
+```clj
+(let [...]
+  (fact "some-description"
+    & assertions
+    (provided 
+      & mocks)))
+```
+
+The difference of the above snippet and the one below, is subtle. Midje doesn't mind either, but fudje will not be able to split the latter into its various parts correctly. In particular, it won't be able to separate the assertions from the mocks. The crucial symbol here is `provided`. That's where we want to make the split. However, the `provided` expression below has been swallowed by the `let`. As a result, it is 2 levels below `fact`, and fudje won't be able to split it correctly. 
+
+```clj
+(fact "some-description"
+  (let [...] ;; don't do that
+    & assertions
+    (provided 
+      & mocks)))
+```
+
+So, to sum up, fudje considers a `fact` well-formed, when the `provided` symbol is only 1 level below the `fact` symbol. If it is not, then you have to start by manually pulling that `let` (or `binding` or whatever) outside the `fact` (as shown 2 snippets above). You can then let `fudje.sweet/fact` do its thing. 
+
+Here are some short examples:
+
+```clj
+
+(defn twice [x] 
+  (* x 2))
+  
+(defn six-times [y] 
+  (* (try (twice y)
+       (catch Exception _ 10)) 
+      3))
+      
+      
+(fact "" 
+  (six-times ...three...) => 24
+  (provided
+    (twice ...three...) => (* 2 4))) 
+
+(fact ""
+  (six-times ...three...) => 24
+  (provided
+    (twice anything) => (* 2 4)))
+
+(let [ten 10 thirty 30]
+  (fact ""
+    (six-times ten) => thirty
+    (provided
+    (twice ten) =throws=> (Exception. "whatever"))))
+```
+
+All the above tests are valid in both midje AND fudje. It all depends which `fact` you're using. The same goes for `tabular`. The following 3 snippets are all equivalent:
+
+
+```clj
+;; midje style
+(tabular
+  (fact "wrand returns correct index"
+    (wrand ?weights) => ?index
+      (provided
+        (rand ?sum) => ?rand))
+    ?weights      ?sum ?rand ?index
+    [3 6 7 12 15] 43   1     0
+    [3 6 7 12 15] 43   3     1
+    [3 6 7 12 15] 43   9     2)
+
+;;fudje recommended style
+(tabular
+  (testing  "wrand returns correct index"
+    (mocking [(rand ?sum) => ?rand]
+      (is (= ?index (wrand ?weights)))))
+    ?weights      ?sum ?rand ?index
+    [3 6 7 12 15] 43   1     0
+    [3 6 7 12 15] 43   3     1
+    [3 6 7 12 15] 43   9     2)    
+
+;;alternative, more traditional style which is closer to `clojure.test/are`
+(are* [weights sum rand index] 
+  (mocking [(rand ?sum) => ?rand]
+    (is (= ?index (wrand ?weights)))))
+    
+  [3 6 7 12 15] 43   1     0
+  [3 6 7 12 15] 43   3     1
+  [3 6 7 12 15] 43   9     2 )
+    
+```
