@@ -8,7 +8,7 @@
 (defn six-times [y] (* (try (twice y)
                             (catch Exception _ 10)) 3))
 
-(defn wrand  ;copied from novate.test.random
+(defn wrand
   "given a vector of slice sizes, returns the index of a slice given a
   random spin of a roulette wheel with compartments proportional to
   slices."
