@@ -14,9 +14,9 @@
   [msg form]
   `(let [probably-expected# ~(nth form 1)
          probably-supplied# ~(nth form 2)
-         [expected# supplied#] (if (fudje.util/poly-checker? probably-expected#)
-                                 [probably-expected# probably-supplied#]
-                                 [probably-supplied# probably-expected#]) ;; make sure we got the order right
+         [expected# supplied#] (if (fudje.util/poly-checker? probably-supplied#)
+                                 [probably-supplied# probably-expected#]
+                                 [probably-expected# probably-supplied#]) ;; make sure we got the order right
 
          [only-expected# only-value# both#] (data/diff expected# supplied#)
          failure# (boolean (cond-> only-expected#
@@ -26,7 +26,7 @@
                                                                                   '~'found only-value#
                                                                                   '~'instead-of only-expected#)})
        (test/do-report {:type :pass, :message ~msg :expected expected#, :actual both#}))
-     (not failure#)))
+     (not failure#)))parti
 
 ;================================================================================================================
 

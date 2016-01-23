@@ -25,10 +25,15 @@
   [mtc ^String sep]
   (keyword (str "..." (.replaceAll (str mtc) sep "") "...")))
 
-(defn qmark?
-  "Returns true if the symbol <x> starts with '?'."
-  [x]
-  (.startsWith (str x) "?"))
+
+(let [fix "?"] ;; predefined prefix/suffix
+  (defn qmark?
+    "Returns true if the symbol <x> starts/ends with '?'."
+    [x]
+    (let [sx (str x)]
+      (or (.startsWith sx fix)
+          (.endsWith sx fix))))
+  )
 
 (defn find-subset
   "Given the already constructed partitions of <other> (via `(partition (count content) 1 other)`),

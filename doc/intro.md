@@ -87,7 +87,7 @@ That is it! You now know how to use `mocking`...
 ### Checkers 
 
 There is not a lot to say here...
-All the checkers have been inspired by midje and therefore offer similar functionality. 
+All the checkers have been inspired by *midje* and therefore offer similar functionality. 
 
 * `contains` (mainly for collections, but also works with String/RegexPattern against String)
 * `just` (for collections)
@@ -97,6 +97,8 @@ All the checkers have been inspired by midje and therefore offer similar functio
 * `has` (mainly for collections but not limited)
 * `every-checker` (`and` for checkers)
 * `anything` or `irrelevant` (self explanatory)
+
+Note: `(contains <something-sequential> :in-any-order)` has the potential of being very slow when used with large-ish inputs (e.g. more than 7-8 elements). This is because, fudje will try to diff all permutations of the expected coll against all partitions of the supplied one (`(partition (count expected) 1 supplied)`)! Therefore, I'd recommend that you don't use this with an expected value counting more than 5-6 elements. Obviously, if the supplied value is also not too big either, that's great, but the most of the cost would come from generating the permutations, rather than the partitions.  
 
 Some short examples:
 
@@ -119,9 +121,18 @@ Some short examples:
                 (two-of map?)))
 ```
 
- Please have a look at the test checkers-test.clj namespace for more demo usage.
+Similarly to midje, checkers can be used both as result-checkers in the assertion (as shown above) and as arg-checkers in the mocking-vector (as shown below).
 
-We're done! You now know how to use fudje...I hope you find it useful!
+```clj
+(testing "arg-checker in mocking vector"
+  (mocking [(f (just {:a (contains [2 3]) 
+                      :b (has every? keyword?)})) => :some-number] 
+    (is (= :some-number (f {:a [1 2 3 4] :b #{:x :y :z}})))))
+```
+
+Please have a look at the test checkers-test.clj namespace for more demo usage.
+
+We're done! You now know how to use fudje!
 
 ### Migrating existing midje facts
 
@@ -182,34 +193,59 @@ All the above tests are valid in both midje AND fudje. It all depends which `fac
 
 
 ```clj
-;; midje style
+(defn wrand ;;need a fn to test
+  "given a vector of slice sizes, returns the index of a slice given a
+  random spin of a roulette wheel with compartments proportional to
+  slices."
+  [slices]
+  (let [total (reduce + slices)
+        r (rand total)]
+    (loop [i 0 sum 0]
+      (if (< r (+ (slices i) sum))
+        i
+        (recur (inc i) (+ (long (slices i)) sum))))))
+;--------------------------------------------------------
+;; 1) midje style (in theory you can carry on writing this)
 (tabular
   (fact "wrand returns correct index"
     (wrand ?weights) => ?index
       (provided
         (rand ?sum) => ?rand))
+        
     ?weights      ?sum ?rand ?index
     [3 6 7 12 15] 43   1     0
     [3 6 7 12 15] 43   3     1
     [3 6 7 12 15] 43   9     2)
 
-;;fudje recommended style
+;; 2) half-and-half style (a bit more evident IMO as it doesn't use `fact`)
 (tabular
   (testing  "wrand returns correct index"
     (mocking [(rand ?sum) => ?rand]
       (is (= ?index (wrand ?weights)))))
+      
     ?weights      ?sum ?rand ?index
     [3 6 7 12 15] 43   1     0
     [3 6 7 12 15] 43   3     1
     [3 6 7 12 15] 43   9     2)    
 
-;;alternative, more traditional style which is closer to `clojure.test/are`
-(are* [weights sum rand index] 
-  (mocking [(rand ?sum) => ?rand]
-    (is (= ?index (wrand ?weights)))))
+;; 3) recommended traditional clojure.test style (MUST use `fudje.sweet/are*`)
+(are* [weights sum rando index] 
+  (mocking [(rand sum) => rando]
+    (is (= index (wrand weights))))
     
   [3 6 7 12 15] 43   1     0
   [3 6 7 12 15] 43   3     1
   [3 6 7 12 15] 43   9     2 )
     
 ```
+
+BTW, the 3 snippets above also demonstrate, the most outer macro-expansion needed in order to achieve code-rewrite. In other words, you can see how an expression which is written entirely in terms of midje (1st one), ends up being rewritten to, essentially, vanilla `clojure.test` code (3rd one). First we convert, `fact` to `mocking`, and then `tabular` to `are*`. I'd personally vote for variant #3 as it requires the least pre-processing, and also because it will probably look a lot more familiar to others.  
+ 
+ 
+## Final words
+ 
+As you may have gathered by now, *fudje* is based on `clojure.test`, `clojure.data`, `with-redefs` & a bunch of `deftype`s (the checkers). As a result, the implementation is pretty straight forward. Macros are used solely for code-rewrite, and there are no occurrences of `eval` or `*ns*`. This basically means that *fudje* is 100% AOT friendly. 
+
+I sincerely hope you find it as useful as we have!
+
+### Keep Calm and Carry On Testing :)
