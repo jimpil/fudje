@@ -49,7 +49,7 @@ This library will NOT be of any interest to you if:
   (dec x))
 
 
-(mocking [(increment 1) => (decrement 1)
+(mocking [(increment 1) => (dec 1)
           (decrement 2) => 3]
           
   (is (= 0 (increment 1)))  ;; no failures
