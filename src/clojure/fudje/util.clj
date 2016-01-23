@@ -28,11 +28,9 @@
 
 (let [fix "?"] ;; predefined prefix/suffix
   (defn qmark?
-    "Returns true if the symbol <x> starts/ends with '?'."
+    "Returns true if the symbol <x> starts with '?'."
     [x]
-    (let [sx (str x)]
-      (or (.startsWith sx fix)
-          (.endsWith sx fix))))
+    (.startsWith (str x) fix))
   )
 
 (defn find-subset
