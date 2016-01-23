@@ -98,9 +98,13 @@ All the checkers have been inspired by *midje* and therefore offer similar funct
 * `every-checker` (`and` for checkers)
 * `anything` or `irrelevant` (self explanatory)
 
-Note: `(contains <something-sequential> :in-any-order)` has the potential of being very slow when used with large-ish inputs (e.g. more than 7-8 elements). This is because, fudje will try to diff all permutations of the expected coll against all partitions of the supplied one (`(partition (count expected) 1 supplied)`)! Therefore, I'd recommend that you don't use this with an expected value counting more than 5-6 elements. Obviously, if the supplied value is also not too big either, that's great, but the most of the cost would come from generating the permutations, rather than the partitions.  
-
-Some short examples:
+Notes: 
+`(contains <something-sequential> :in-any-order)` has the potential of being very slow when used with large-ish inputs (e.g. more than 7-8 elements). This is because, fudje will try to diff all permutations of the expected coll against all partitions of the supplied one (`(partition (count expected) 1 supplied)`)! Therefore, I'd recommend that you don't use this with an expected value counting more than 5-6 elements. Obviously, if the supplied value is also not too big either, that's great, but the most of the cost would come from generating the permutations, rather than the partitions.
+  
+`checker` can be used either with an fntail (a-la midje: `(checker [x] (== 5 x))`) or an actual fn object (a-la fudje: `(checker (fn [x] (== 5 x)))`). I recommend the latter but fudje has to support the former too, in order to be able to translate the midje version without manual intervention. 
+   
+  
+Let's see some short examples:
 
 ```clj
 
@@ -119,6 +123,10 @@ Some short examples:
 
 (is (compatible [{:a 1} {}] ;; order of arguments passed to `compatible` doesn't matter
                 (two-of map?)))
+
+;; Bare functions are NOT supported as checkers.                
+(is (compatible {:a pos?} {:a 1}))           ;; will NOT work in fudje 
+(is (compatible {:a (checker pos?)} {:a 1})) ;; need to use a `checker`                
 ```
 
 Similarly to midje, checkers can be used both as result-checkers in the assertion (as shown above) and as arg-checkers in the mocking-vector (as shown below).
