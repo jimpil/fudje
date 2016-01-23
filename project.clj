@@ -1,4 +1,4 @@
-(defproject fudje "0.8.3"
+(defproject fudje "0.8.4-SNAPSHOT"
   :description "A small unit-testing library heavily inspired by midje."
   :url "https://github.com/jimpil/fudje"
   :license {:name "Eclipse Public License"
