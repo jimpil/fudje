@@ -98,10 +98,11 @@ All the checkers have been inspired by *midje* and therefore offer similar funct
 * `every-checker` (`and` for checkers)
 * `anything` or `irrelevant` (self explanatory)
 
-Notes: 
-`(contains <something-sequential> :in-any-order)` has the potential of being very slow when used with large-ish inputs (e.g. more than 7-8 elements). This is because, fudje will try to diff all permutations of the expected coll against all partitions of the supplied one (`(partition (count expected) 1 supplied)`)! Therefore, I'd recommend that you don't use this with an expected value counting more than 5-6 elements. Obviously, if the supplied value is also not too big either, that's great, but the most of the cost would come from generating the permutations, rather than the partitions.
+Notes:
+ 
+* `(contains <something-sequential> :in-any-order)` has the potential of being very slow when used with large-ish inputs (e.g. more than 7-8 elements). This is because, fudje will try to diff all permutations of the expected coll against all partitions of the supplied one (`(partition (count expected) 1 supplied)`)! Therefore, I'd recommend that you don't use this with an expected value counting more than 5-6 elements. Obviously, if the supplied value is also not too big either, that's great, but the most of the cost would come from generating the permutations, rather than the partitions.
   
-`checker` can be used either with an fntail (a-la midje: `(checker [x] (== 5 x))`) or an actual fn object (a-la fudje: `(checker (fn [x] (== 5 x)))`). I recommend the latter but fudje has to support the former too, in order to be able to translate the midje version without manual intervention. 
+* `checker` can be used either with an fntail (a-la midje: `(checker [x] (== 5 x))`) or an actual fn object (a-la fudje: `(checker (fn [x] (== 5 x)))`). I recommend the latter but fudje has to support the former too, in order to be able to translate the midje version without manual intervention. 
    
   
 Let's see some short examples:
