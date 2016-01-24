@@ -26,7 +26,7 @@
                                                                                   '~'found only-value#
                                                                                   '~'instead-of only-expected#)})
        (test/do-report {:type :pass, :message ~msg :expected expected#, :actual both#}))
-     (not failure#)))parti
+     (not failure#)))
 
 ;================================================================================================================
 
