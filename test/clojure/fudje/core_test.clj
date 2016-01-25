@@ -92,6 +92,6 @@
 
 (deftest background-tests
   (testing "in-background"
-    (in-background [(plus anything anything) => (six-times 2)]
+    (in-background [(plus anything 2) => (six-times 2)]
       (is (= 12  (times 2 2))))))
 
