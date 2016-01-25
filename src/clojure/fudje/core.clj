@@ -38,16 +38,15 @@
             (fn? mock-fn) (apply args))))
 
 (defn arg-checking-wrapper [f original-mock-fn args-to-check group-no]
-  (let [^AtomicLong mcounter (when-not (zero? group-no) (AtomicLong. 0))
+  (let [^AtomicLong mcounter (AtomicLong. 0)
         groups? (when (> group-no 1) true)]
     (bound-fn [& args]
       (if fudje.core/*report-mock-state*
-        {:actual-calls (if mcounter (.get mcounter) 0)
+        {:actual-calls (.get mcounter)
          :expected-calls group-no}
 
         (let [vargs (vec args)
-              curr-i (when mcounter
-                       (.getAndIncrement mcounter))
+              curr-i (.getAndIncrement mcounter)
               relevant-arg-group (try (cond-> args-to-check  ;;only test the relevant arg-group, if there is a state-counter
                                         groups? (nth curr-i))
                                       (catch IndexOutOfBoundsException _
@@ -60,7 +59,7 @@
           ;;side-effects per `dorun`
           (dorun (map (fn [supplied against]
                         (clojure.test/is (compatible against supplied)  ;; use our new assertion-expr with `is` as it was meant to be
-                                         (str "Testing arguments used in `" f "`...\n**Expected arg-list: " relevant-arg-group "\n**Actual arg-list: " vargs "\n**N-call: " (inc (or curr-i 0)))))
+                                         (str "Testing arguments used in `" f "`...\n**Expected arg-list: " relevant-arg-group "\n**Actual arg-list: " vargs "\n**N-call: " (inc curr-i))))
                       vargs
                       relevant-arg-group))
 
@@ -68,7 +67,7 @@
                                      groups? (nth curr-i)) vargs)
           )))))
 
-(defmacro make-mocks [background? mock-forms]
+(defmacro make-mocks [mock-forms]
   `(let [triplets# (partition 3 ~mock-forms)
          [mock-outs# mock-ins#] ((juxt (partial mapv first)
                                        (partial mapv last))
@@ -82,8 +81,7 @@
                                           (let [arg-groups# (vec (second item#))
                                                 group-count# (count arg-groups#)]
                                             [fsym# `(arg-checking-wrapper ~fsym# ~(nth mock-ins# index#) ~arg-groups# ~group-count#)])
-                                          [(cond-> fsym#
-                                             ~background? (with-meta {:novate.test/stateless true})) `(arg-checking-wrapper ~fsym# ~(nth mock-ins# index#) ~rsym# ~(if ~background? 0 1))]))
+                                          [fsym# `(arg-checking-wrapper ~fsym# ~(nth mock-ins# index#) ~rsym# 1)]))
                                       [(with-meta item# {:novate.test/stateless true}) (nth mock-ins# index#)])))
                      (apply concat))
          resolved-syms# (->> mocks#
@@ -152,7 +150,7 @@
    "
   [mock-forms & tests]
   (assert (zero? (rem (count mock-forms) 3)) "`mocking` expects a vector of triplets [& [mock-out => mock-in]]!")
-  (let [[mocks resolved-syms] (make-mocks false mock-forms)]
+  (let [[mocks resolved-syms] (make-mocks mock-forms)]
     `(with-redefs [~@mocks]
        (try ~@tests
             (finally
@@ -171,7 +169,7 @@
   Intended as a replacement over midje's `against-background`."
   [mock-forms & body]
   (assert (zero? (rem (count mock-forms) 3)) "`in-background` expects a vector of triplets [& [mock-out => mock-in]]!")
-  (let [[mocks _] (make-mocks true mock-forms)]
+  (let [[mocks _] (make-mocks mock-forms)]
     `(with-redefs [~@mocks]
        ~@body)))
 

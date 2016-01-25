@@ -49,7 +49,7 @@ Let's make things more concrete though...First let's define some functions that 
   (dec x))
 
 
-(mocking [(increment 1) => (decrement 1)
+(mocking [(increment 1) => (dec 1)
           (decrement 2) => 3]
           
   (is (= 0 (increment 1)))
@@ -60,7 +60,7 @@ Let's make things more concrete though...First let's define some functions that 
 
 Ok, now you've seen the basic syntax. For the most part this is what you will be dealing with. However, since `mocking` basically boils down to `with-redefs`, there is a catch. You cannot have, the same function/function-invocation mocked more than once. The syntax for what fudje calls a *multimock* is slightly different... 
 
-A multimock must have the following form:
+A **multimock** must have the following form:
 
 ```clj
 (^:multimock f [& arg-lists]) => [& return-lists]
