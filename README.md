@@ -52,13 +52,22 @@ This library will NOT be of any interest to you if:
 (mocking [(increment 1) => (dec 1)
           (decrement 2) => 3]
           
-  (is (= 0 (increment 1)))  ;; no failures
-  (is (= 3 (decrement 2)))) ;; no failures
+  (is (= 0 (increment 1))) 
+  (is (= 3 (decrement 2))))
 
+=> true
   
 (mocking [(increment 1) => :whatever]        
-  (is (= :whatever (increment 2))))  ;; 2 failures (wrong argument passed + wrong result in assertion `(not= :whatever 3)`) 
+  (is (= :whatever (increment 2))))  ;; 1 failure (wrong argument passed) 
 
+Testing arguments used in `user$increment@58d6dddc`...
+**Expected arg-list: [1]
+**Actual arg-list: [2]
+**N-call: 1
+expected: 1
+  actual: (found 2 instead-of 1)
+
+=> true
 ```
 
 Please consult the [intro](https://github.com/jimpil/fudje/blob/master/doc/intro.md) for a more comprehensive demo.

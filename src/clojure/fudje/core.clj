@@ -60,7 +60,7 @@
           ;;side-effects per `dorun`
           (dorun (map (fn [supplied against]
                         (clojure.test/is (compatible against supplied)  ;; use our new assertion-expr with `is` as it was meant to be
-                                         (str "Testing arguments used in `" f "`...\n**Expected arg-list: " relevant-arg-group "\n**Actual arg-list: " vargs "\n**N-call: " curr-i)))
+                                         (str "Testing arguments used in `" f "`...\n**Expected arg-list: " relevant-arg-group "\n**Actual arg-list: " vargs "\n**N-call: " (inc (or curr-i 0)))))
                       vargs
                       relevant-arg-group))
 
