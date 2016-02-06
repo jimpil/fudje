@@ -182,13 +182,15 @@
 
 
 (defmacro tabular [fact-expr & body]
-  (let [arga (volatile! #{})
-        _ (clojure.walk/prewalk (fn [x]
-                                  (if (fudje.util/qmark? x)
-                                    (do (vswap! arga conj x) x)
-                                    x))
-                                fact-expr)
-        [args assertions] (split-at (count @arga) body)]
-    `(fudje.sweet/are* ~(vec args) ~fact-expr ~@assertions)))
+  (with-local-vars [arga #{}]
+    (clojure.walk/prewalk (fn [x]
+                            (if (fudje.util/qmark? x)
+                              (do (var-set arga (conj @arga x)) x)
+                              x))
+                          fact-expr)
+    (let [[args assertions] (split-at (count @arga) body)]
+      `(fudje.sweet/are* ~(vec args) ~fact-expr ~@assertions))
+    )
+  )
 
 
