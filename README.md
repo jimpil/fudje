@@ -64,7 +64,7 @@ Testing arguments used in `user$increment@58d6dddc`...
 **Expected arg-list: [1]
 **Actual arg-list: [2]
 **N-call: 1
-expected: 1
+expected: (compatible 1 2)
   actual: (found 2 instead-of 1)
 
 => true
