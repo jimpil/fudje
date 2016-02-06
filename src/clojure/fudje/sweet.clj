@@ -116,10 +116,8 @@
                       true))
         (map (partial clojure.walk/postwalk (fn [form#]
                                               (let [[mc?# to-replace#] (fudje.util/metaconstant? form#)]
-                                                (cond
-                                                  mc?# (fudje.util/metaconstant->kw form# to-replace#)
-
-                                                  :else
+                                                (if mc?#
+                                                  (fudje.util/metaconstant->kw form# to-replace#)
                                                   (if (fudje.util/throwable? to-replace#) ;;we do not support replacing funciton-metaconstants, check for the Exception object here
                                                     (throw to-replace#)
                                                     form#))))))))

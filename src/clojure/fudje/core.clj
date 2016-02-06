@@ -22,10 +22,10 @@
          failure# (boolean (cond-> only-expected#
                                    (coll? only-expected#) seq))]
      (if only-expected#
-       (test/do-report {:type :fail, :message ~msg :expected expected#, :actual (list
-                                                                                  '~'found only-value#
-                                                                                  '~'instead-of only-expected#)})
-       (test/do-report {:type :pass, :message ~msg :expected expected#, :actual both#}))
+       (test/do-report {:type :fail, :message ~msg :expected '~form, :actual (list
+                                                                               '~'found only-value#
+                                                                               '~'instead-of only-expected#)})
+       (test/do-report {:type :pass, :message ~msg :expected '~form, :actual supplied#}))
      (not failure#)))
 
 ;================================================================================================================
