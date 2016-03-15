@@ -60,12 +60,10 @@ This library will NOT be of any interest to you if:
 (mocking [(increment 1) => :whatever]        
   (is (= :whatever (increment 2))))  ;; 1 failure (wrong argument passed) 
 
-Testing arguments used in `user$increment@58d6dddc`...
-**Expected arg-list: [1]
-**Actual arg-list: [2]
-**N-call: 1
-expected: (compatible 1 2)
-  actual: (found 2 instead-of 1)
+Fail in blah-blah-blah
+Function `user$increment@58d6dddc` was called with unexpected arguments!"
+expected: [1]
+  actual: [2]
 
 => true
 ```
