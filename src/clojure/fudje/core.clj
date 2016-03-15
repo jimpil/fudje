@@ -56,16 +56,14 @@
                      (count relevant-arg-group))
                   (str "Number of arguments between the mock-call and the actual function call don't match! Aborting ...\n**Mock-args: " relevant-arg-group "\n**Actual-args: " vargs))
 
-          ;;side-effects per `dorun`
-          (dorun (map (fn [supplied against]
-                        (clojure.test/is (compatible against supplied)  ;; use our new assertion-expr with `is` as it was meant to be
-                                         (str "Testing arguments used in `" f "`...\n**Expected arg-list: " relevant-arg-group "\n**Actual arg-list: " vargs "\n**N-call: " (inc curr-i))))
-                      vargs
-                      relevant-arg-group))
+          ;; use our new assertion-expr with `is` as it was meant to be
+          (clojure.test/is (compatible relevant-arg-group vargs)
+                           (if groups?
+                             (str "Function `" f "` (call " (inc curr-i) ") was called with unexpected arguments!")
+                             (str "Function `" f "` was called with unexpected arguments!")))
 
-          (#'fudje.core/apply-mock (cond-> original-mock-fn ;; if there is a state-counter <mock-fn> is a list of values
-                                     groups? (nth curr-i)) vargs)
-          )))))
+          (apply-mock (cond-> original-mock-fn ;; if there is a state-counter <mock-fn> is a list of values
+                              groups? (nth curr-i)) vargs))))))
 
 (defmacro make-mocks [mock-forms]
   `(let [triplets# (partition 3 ~mock-forms)

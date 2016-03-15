@@ -6,6 +6,7 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/math.combinatorics "0.1.1"  :exclusions [org.clojure]]] ;; avoid  pulling  clj 1.4
 
-  :source-paths ["src/clojure" "test/clojure"]
+  :source-paths ["src/clojure"]
+  :test-paths ["test/clojure"]
   :java-source-paths ["src/java"]
   )
