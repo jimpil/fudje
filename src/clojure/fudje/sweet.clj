@@ -149,7 +149,52 @@
   ATTENTION: `let` bindings right after a `midje.sweet.fact` should be manually pulled one level up, before switching to `novate.sweet.fact`."
   [description & forms]
   (assert (string? description) "`novate.sweet/fact` requires a String description as the first arg (per `clojure.test/testing`)...")
-  (let [[pre-provided post-provided] (fudje.sweet/split-in-provided-without-metaconstants forms)
+  ;; MAKE SURE THERE IS NO EXPRESSION SHADOWING THE MOCKS:
+  ;; we want to avoid a situation where the `provided` clauses are not visible when splitting the entire `fact` into assertions & mocks.
+  ;; For example the following is bad because there are 2 nesting levels separating the `fact` & `provided` symbols, whereas there should only be 1.
+  ;;(fact ""
+  ;;  (let [a 1]
+  ;;    (x a) => 5
+  ;; (provided
+  ;;   (y 2) => 6)))
+  ;;
+  ;; Instead of bypassing this silently (which renders the test useless), we want to make this a compile-time error.
+  ;; However, we need to take extra care to allow for similar looking expressions that don't violate the rule.
+  ;; For example the following should be allowed:
+  ;;
+  ;; (fact ""
+  ;;  (let [a 1]
+  ;;    (x a)) => 5 ; notice how the `let` closes here instead of at the end
+  ;; (provided
+  ;;   (y 2) => 6))
+
+  ;; first thing we need to know is whether the original expression we're rewriting comtains any mocks
+  (let [mocks-present? (some true? (map #(with-local-vars [mocks? false]
+                                          (clojure.walk/prewalk (fn mock-flag? [x]
+                                                                  (do (when (= 'provided x)
+                                                                        (var-set mocks? true))
+                                                                      x))
+                                                                %)
+                                          (var-get mocks?))
+                                        forms))
+        [pre-provided post-provided] (fudje.sweet/split-in-provided-without-metaconstants forms)
+
+        ;; following assertion covers the case where the mock expressions have been shadowed by some expression (e.g `let`),
+        ;; and as such the whole expression cannot be reliably split into assertions VS mocks. There is just no way to get well-formed assertions,
+        ;; if there is a `let` right under the `fact` and is consuming the whole body of the `fact`. The only way to get well-formed assertions while mixing e.g. `let` expressions,
+        ;; is to limit the `let`'s scope to either the left, or the right side of the assertion, in which case it is perfectly legal to do so and should be allowed.
+        _ (assert (zero? (rem (count pre-provided) 3))
+                  "Well-formed assertions should have 3 identifiable parts (e.g. `x => y`)...\nIt is likely that some expression (e.g `let`) is shadowing your assertion(s), and potentially the mocks as well! If so, manually lift that expression outside the `fact`, and try again.")
+
+        mocks (-> post-provided first rest)
+
+        ;; following assertion will fire if the mocks are empty, or if they are not well-formed (as triplets similar to the assertions).
+        ;; In absence of spelling errors, and since the assertion before it covers the 'shadowing' issue, the mocks should never be empty at this point
+        ;; (given that the original expression did contain a 'provided symbol). So here, we're mainly checking that the mocks are indeed triplets.
+        _ (when mocks-present?
+            (assert (and (not-empty post-provided)
+                         (zero? (rem (count mocks) 3))) "Well-formed mocks should have 3 identifiable parts (e.g. `x => y`)... "))
+
         tests (->> pre-provided
                    (partition 3)
                    (map (fn [[t _ r :as x]]

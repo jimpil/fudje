@@ -21,6 +21,12 @@
           (provided
             (twice ten) =throws=> (Exception. "whatever"))))
 
+  (fact "`fact` code re-write with exception mock AND inner `let` bindings"
+        (let [ten 10]
+          (six-times ten)) => 30
+        (provided
+          (twice 10) =throws=> (Exception. "whatever")))
+
   (fact "`fact` code re-write with metaconstants AND exception mock AND exception test"
         (six-times .whatever.) => (throws Exception "whatever") ;; we coud have `(Exception. "whatever")`
         (provided
