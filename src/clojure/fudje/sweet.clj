@@ -18,10 +18,38 @@
   [x & modifiers]
   `(fudje.checkers/->ContainsChecker ~x ~(zipmap modifiers (repeat true))))
 
+(defmacro contains-in [x]
+  "A macro for nested checking of data in the `contains` form"
+  (cond (map? x)
+        `(contains ~(reduce-kv (fn [out k v]
+                                 (assoc out k `(contains-in ~v)))
+                               {}
+                               x))
+        (vector? x)
+        `(contains ~(reduce (fn [out v]
+                               (conj out `(contains-in ~v)))
+                               []
+                               x))
+        :else x))
+
 (defmacro just
   "A macro to help us simulate the `just` argument-checker."
   [x & modifiers]
   `(fudje.checkers/->JustChecker ~x ~(zipmap modifiers (repeat true))))
+
+(defmacro just-in [x]
+  "A macro for nested checking of data in the `just` form"
+  (cond (map? x)
+        `(just ~(reduce-kv (fn [out k v]
+                                 (assoc out k `(just-in ~v)))
+                           {}
+                           x))
+        (vector? x)
+        `(just ~(reduce (fn [out v]
+                          (conj out `(just-in ~v)))
+                        []
+                        x))
+        :else x))
 
 (defmacro checker
   "A macro to help us simulate the `checker` checker."
