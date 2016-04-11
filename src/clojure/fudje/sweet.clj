@@ -242,3 +242,37 @@
   )
 
 
+;; credit for the following goes to @zcaudate (Chris Zheng)
+
+(defmacro facts
+  "An (almost) drop-in replacement for `midje.sweet/facts`"
+  [& body]
+  `(fact ~@body))
+
+(defmacro contains-in [x]
+  "A macro for nested checking of data in the `contains` form"
+  (cond (map? x)
+        `(contains ~(reduce-kv (fn [out k v]
+                                 (assoc out k `(contains-in ~v)))
+                               {}
+                               x))
+        (vector? x)
+        `(contains ~(reduce (fn [out v]
+                              (conj out `(contains-in ~v)))
+                            []
+                            x))
+        :else x))
+
+(defmacro just-in [x]
+  "A macro for nested checking of data in the `just` form"
+  (cond (map? x)
+        `(just ~(reduce-kv (fn [out k v]
+                             (assoc out k `(just-in ~v)))
+                           {}
+                           x))
+        (vector? x)
+        `(just ~(reduce (fn [out v]
+                          (conj out `(just-in ~v)))
+                        []
+                        x))
+        :else x))

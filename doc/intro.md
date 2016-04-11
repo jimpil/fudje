@@ -104,6 +104,25 @@ Notes:
   
 * `checker` can be used either with an fntail (a-la midje: `(checker [x] (== 5 x))`) or an actual fn object (a-la fudje: `(checker (fn [x] (== 5 x)))`). I recommend the latter but fudje has to support the former too, in order to be able to translate the midje version without manual intervention. 
    
+
+* `contains-in` a version of `contains` which removes the boilerplate when asserting membership of some value in nested structures. Only works against maps and vectors. For example, instead of writing the following:
+
+```clj
+(fact "..."
+  {:a {:b {:c "1"}}} => (contains {:a (contains {:b (contains {:c (checker string?)})})}))
+
+```
+
+you can write this instead:
+
+```clj
+(fact "..."
+  {:a {:b {:c "1"}}} => (contains-in {:a {:b {:c (checker string?)}}})
+
+```
+
+
+* `just-in` a version of `just` which removes the boilerplate when asserting precise membership of values in nested structures. Only works against maps and vectors. 
   
 Let's see some short examples:
 

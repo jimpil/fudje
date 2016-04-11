@@ -72,7 +72,7 @@ Please consult the [intro](https://github.com/jimpil/fudje/blob/master/doc/intro
 
 ## Requirements
 
-Fudje has been tested against Clojure versions 1.5.1, 1.6, 1.7 and 1.8, but should work with earlier versions as well (possibly down to 1.2).  
+Fudje has been tested against Clojure versions 1.5.1, 1.6, 1.7 and 1.8, but should work with earlier versions as well (possibly down to 1.2). The oldest JDK you can use is 1.6. 
 
 ## License
 
