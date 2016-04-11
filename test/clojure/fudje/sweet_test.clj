@@ -42,7 +42,7 @@
         (provided
           (six-times (contains {:n (checker [x] (pos? x))})) => {:a 1}))
 
-  (fact "`fact` code re-write with `just` checker assertion + arg custom checker with fn experssion"
+  (fact "`fact` code re-write with `just` checker assertion + arg custom checker with fn expression"
         (six-times 10) => (just {:a (checker [x] (pos? x))})
         (provided
           (six-times (checker (fn [x] (pos? x)))) => {:a 1})) ;;this looks slightly different than midje `checker` so we have to change it manually
@@ -68,6 +68,11 @@
         (six-times {:z {:zz :tt :yy :pp} :aa :bb}) => (two-of map?)
         (provided
           (six-times (contains {:z (contains {:zz :tt})})) => [{:a 1 :b 2} {}]))
+
+  (fact "`fact` code re-write with `n-of` assertion + nested `contains-in` checker"
+        (six-times {:z {:zz :tt :yy :pp} :aa :bb}) => (two-of map?)
+        (provided
+          (six-times (contains-in {:z {:zz :tt}})) => [{:a 1 :b 2} {}]))
 
 
   (fact "`fact` code re-write with `has` assertion"
