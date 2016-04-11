@@ -209,7 +209,10 @@
          ~@(fudje.sweet/expand-tests tests)))
     ))
 
-
+(defmacro facts
+  "An (almost) drop-in replacement for `midje.sweet/facts`"
+  [& body]
+  `(fact ~@body))
 
 (defmacro are* ;;
   "Slightly patched version of `clojure.test/are` that assumes that <expr> is a `fact` or `mocking`.
