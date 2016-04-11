@@ -144,11 +144,10 @@
 
 
 (defmacro fact
-  "An (almost) drop-in replacement for `midje.sweet/fact` which rewrites the code to not use Midje.
-  Rudimentary support for converting top-level midje checkers exists (`contains` & `just`).
-  ATTENTION: `let` bindings right after a `midje.sweet.fact` should be manually pulled one level up, before switching to `novate.sweet.fact`."
-  [description & forms]
-  (assert (string? description) "`novate.sweet/fact` requires a String description as the first arg (per `clojure.test/testing`)...")
+  "An (almost) drop-in replacement for `midje.sweet/fact` which rewrites the code to not use Midje..
+  ATTENTION: `let` bindings right after a `midje.sweet.fact` should be manually pulled one level up, before switching to `fudje.sweet/fact`."
+  [& forms]
+
   ;; MAKE SURE THERE IS NO EXPRESSION SHADOWING THE MOCKS:
   ;; we want to avoid a situation where the `provided` clauses are not visible when splitting the entire `fact` into assertions & mocks.
   ;; For example the following is bad because there are 2 nesting levels separating the `fact` & `provided` symbols, whereas there should only be 1.
@@ -169,7 +168,11 @@
   ;;   (y 2) => 6))
 
   ;; first thing we need to know is whether the original expression we're rewriting comtains any mocks
-  (let [mocks-present? (some true? (map #(with-local-vars [mocks? false]
+  (let [fform (first forms)
+        [description forms] (if (string? fform)
+                              [fform (rest forms)]
+                              ["" forms])
+        mocks-present? (some true? (map #(with-local-vars [mocks? false]
                                           (clojure.walk/prewalk (fn mock-flag? [x]
                                                                   (do (when (= 'provided x)
                                                                         (var-set mocks? true))

@@ -77,7 +77,7 @@
                                                 group-count# (count arg-groups#)]
                                             [fsym# `(arg-checking-wrapper ~fsym# ~(nth mock-ins# index#) ~arg-groups# ~group-count#)])
                                           [fsym# `(arg-checking-wrapper ~fsym# ~(nth mock-ins# index#) ~rsym# 1)]))
-                                      [(with-meta item# {:novate.test/stateless true}) (nth mock-ins# index#)])))
+                                      [(with-meta item# {:fudje.core/stateless true}) (nth mock-ins# index#)])))
                      (apply concat))
          resolved-syms# (->> mocks#
                              (take-nth 2)
@@ -151,7 +151,7 @@
             (finally
               (binding [fudje.core/*report-mock-state* true]
                 (doseq [[s# f#] '~resolved-syms]
-                  (when-let [state# (when-not (-> s# meta :novate.test/stateless) (f#))] ;; returns `{:actual-calls x, :expected-calls y}` OR nil
+                  (when-let [state# (when-not (-> s# meta :fudje.core/stateless) (f#))] ;; returns `{:actual-calls x, :expected-calls y}` OR nil
                     (clojure.test/is (= (:expected-calls state#)
                                         (:actual-calls state#))
                                      (str "`" f# "`" " was NOT called the right number of times!")))))

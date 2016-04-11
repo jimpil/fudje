@@ -91,7 +91,7 @@
     0
     2)
 
-         ;;following test was copied from  novate.test.random-test
+
   (tabular ;; complex tabular works
     (fact "wrand returns correct index"
       (wrand ?weights) => ?index
