@@ -90,6 +90,9 @@
         (provided
           (six-times (contains {:z (contains {:zz anything})})) => nil))
 
+  (facts
+    (- 1 2) => -1)
+
   (tabular  ;; simple tabular fact works
     (fact "adding/multiplying with self is the same for '0' and '2'" (+ ?x ?x) => (* ?x ?x))
     ?x

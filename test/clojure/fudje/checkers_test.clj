@@ -111,8 +111,9 @@
       "contains works with char against string")
   (is (compatible (contains \R) [:a :b \R])
       "contains works with char against coll")
-  (is (compatible (roughly 3.5 1) 3.8)
-      "roughly checker works")
+  (let [x 3.5 t 1]
+    (is (compatible (roughly x t) 3.8)
+      "roughly checker works"))
 
 
 

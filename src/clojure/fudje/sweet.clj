@@ -93,9 +93,9 @@
 (defmacro roughly
   "A macro to help us simulate the `roughly` checker."
   [x & y]
-  (do
-    (assert (number? x) "First argument to `roughly` MUST be a number!")
-    `(fudje.checkers/->RoughlyChecker ~x ~(first y))))
+  `(let [x# ~x]
+    (assert (number? x#) "First argument to `roughly` MUST be a number!")
+    (fudje.checkers/->RoughlyChecker x# ~(first y))))
 
 (defmacro every-checker
   "A macro to help us simulate the `every-checker` checker."
