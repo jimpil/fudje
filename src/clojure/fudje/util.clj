@@ -10,16 +10,16 @@
   (instance? IChecker x))
 
 (defn metaconstant? [s]
-  (when (and (symbol? s)
-             (not= '- s)) ;; special case `clojure.core/-`
+  (when (symbol? s)
     (let [ss (str s)]
-      (cond
-        (and (.startsWith ss ".")
-             (.endsWith ss ".")) [true "\\."] ;;for function meta-constants we'd use [true "\\-"]
-        (and (.startsWith ss "-")
-             (.endsWith ss "-")) [false (IllegalStateException. "Converting function-metaconstants is NOT supported as these tests will have to be re-written from scratch anyway!")]
-        :else
-        [false nil]))))
+      (when (> (.length ss) 2)
+        (cond
+          (and (.startsWith ss ".")
+               (.endsWith ss ".")) [true "\\."] ;;for function meta-constants we'd use [true "\\-"]
+          (and (.startsWith ss "-")
+               (.endsWith ss "-")) [false (IllegalStateException. "Converting function-metaconstants is NOT supported as these tests will have to be re-written from scratch anyway!")]
+          :else
+          [false nil])))))
 
 (defn metaconstant->kw
   "Converts a midje metaconstant to a keyword.
