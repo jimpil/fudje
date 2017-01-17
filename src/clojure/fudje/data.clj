@@ -51,9 +51,9 @@
           eqpb (equality-partition b)]
       (cond
         (or (= eqpa eqpb)
-            (and (set? eqpa)
+            (and (set? eqpa) ;; got a poly-checker
                  (contains? eqpa eqpb))) (diff-similar a b)
-        (and (set? eqpb)
+        (and (set? eqpb)     ;; got a poly-checker
              (contains? eqpb eqpa)) (diff-similar b a) ;; allow passing the expected VS actual value in reverse order
 
         :else (atom-diff a b)))))
@@ -67,11 +67,11 @@
         in-a (contains? a k)
         in-b (contains? b k)
         same (and in-a in-b
-                  (or (not (nil? ab))
+                  (or (some? ab)
                       (and (nil? va)
                            (nil? vb))))]
-    [(when (and in-a (or (not (nil? a*)) (not same))) {k a*})
-     (when (and in-b (or (not (nil? b*)) (not same))) {k b*})
+    [(when (and in-a (or (some? a*) (not same))) {k a*})
+     (when (and in-b (or (some? b*) (not same))) {k b*})
      (when same {k ab})]))
 
 (defn- diff-associative
@@ -79,7 +79,7 @@
   [a b ks]
   (reduce
     (fn [diff1 diff2]
-      (doall (map merge diff1 diff2)))
+      (mapv merge diff1 diff2))
     [nil nil nil]
     (map
       (partial diff-associative-key a b)

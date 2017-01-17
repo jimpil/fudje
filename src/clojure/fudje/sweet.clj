@@ -252,15 +252,15 @@
 (defmacro contains-in [x]
   "A macro for nested checking of data in the `contains` form"
   (cond (map? x)
-        `(contains ~(reduce-kv (fn [out k v]
-                                 (assoc out k `(contains-in ~v)))
-                               {}
-                               x))
+        `(fudje.sweet/contains ~(reduce-kv (fn [out k v]
+                                             (assoc out k `(fudje.sweet/contains-in ~v)))
+                                           {}
+                                           x))
         (vector? x)
-        `(contains ~(reduce (fn [out v]
-                              (conj out `(contains-in ~v)))
-                            []
-                            x))
+        `(fudje.sweet/contains ~(reduce (fn [out v]
+                                          (conj out `(fudje.sweet/contains-in ~v)))
+                                        []
+                                        x))
         :else x))
 
 (defmacro just-in [x]

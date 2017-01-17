@@ -18,9 +18,9 @@
                                  [probably-supplied# probably-expected#]
                                  [probably-expected# probably-supplied#]) ;; make sure we got the order right
          [only-expected# only-value# both#] (data/diff expected# supplied#)
-         failure# (boolean (cond-> only-expected#
-                                   (coll? only-expected#) seq))]
-     (if only-expected#
+         failure# (or (some? only-expected#)
+                      (some? only-value#))]
+     (if failure#
        (test/do-report {:type :fail, :message ~msg :expected expected#, :actual supplied#})
        (test/do-report {:type :pass, :message ~msg :expected expected#, :actual both#}))
      (not failure#)))

@@ -9,6 +9,13 @@
 (defonce shapes #{:atom :sequential :map :set})
 
 ;==============<POLYMORPHIC CHECKERS THAT INTERFACE DIRECTLY WITH `fudje.data`>========================================
+(defn- x-in-coll-diff
+  [x coll]
+  (if (some #{x} coll)
+    [nil nil x]
+    [x coll nil])
+  )
+
 
 (deftype ContainsChecker [content opts]
   data/Diff
@@ -20,16 +27,16 @@
       :set (data/diff-similar content (set/select content (cond-> other
                                                                   (not (set? other)) set)))
       :sequential (or (ut/diff-sequential* content other opts)
-                      [this other nil])
-      :atom (if (string? content)  ;; let's make the extra effort to support :atoms in `contains` and ease the situation with Strings
-              (if (string? other)
-                (if (re-find (re-pattern content) other)
-                  [nil nil other]
-                  [this other nil])
-                (data/diff-similar (cond->> content
-                                       (not (set? content)) (conj #{})) other))
-              (data/diff-similar (cond->> content
-                                     (not (set? content)) (conj #{})) other))
+                      ;; fall-back to `diff-similar` for a meaninfgul result
+                      (if (:in-any-order opts)
+                        (data/diff-similar (set content) (cond-> other (not (set? other)) set))
+                        (data/diff-similar content other)))
+      :atom (if (and (string? content) ;; let's make the extra effort to support :atoms in `contains` and ease the situation with Strings
+                     (string? other))
+              (if (re-find (re-pattern content) other)
+                [nil nil (or other this)]
+                [content other nil])
+              (x-in-coll-diff content other))
       ))
   data/EqualityPartition
   (equality-partition [_]
@@ -56,18 +63,10 @@
 (deftype JustChecker [content opts]
   data/Diff
   (diff-similar [this other]
-    (if (= :sequential (data/equality-partition this))
-      (let [ignore-order? (:in-any-order opts)] ;; gaps-ok has no effect here
-        (if ignore-order?
-          (let [[a b both :as diff] (data/diff-similar (set content) (set other))]
-            (if (empty? b)
-              diff
-              [this b both]))
-          (data/diff-similar content other)))
-      (let [[a b both :as diff] (data/diff-similar content other)] ;;diff normally for maps and sets
-        (if (empty? b)
-          diff
-          [this b both]))))
+    (if (and (= :sequential (data/equality-partition this))
+             (:in-any-order opts)) ;; `;gaps-ok` has no effect here
+      (data/diff-similar (set content) (set other))
+      (data/diff-similar content other)))  ;;diff normally for maps and sets
   data/EqualityPartition
   (equality-partition [_]
     (data/equality-partition content))
@@ -93,7 +92,7 @@
   data/Diff
   (diff-similar [this other ]
     (if (testfn other)
-      [nil nil other]
+      [nil nil (or other this)]
       [this other nil]))
   data/EqualityPartition
   (equality-partition [_]
@@ -117,7 +116,7 @@
     (let [c-other (count other)]
       (if (and (every? f other)
                (= n c-other))
-        [nil nil other] ;; no diff
+        [nil nil (or other this)] ;; no diff
         [this other nil])))
   data/EqualityPartition
   (equality-partition [_]
@@ -140,7 +139,7 @@
   data/Diff
   (diff-similar [this other]
     (if (qf f other)
-      [nil nil other] ;; no diff
+      [nil nil (or other this)] ;; no diff
       [this other nil]))
   data/EqualityPartition
   (equality-partition [_]
@@ -163,7 +162,7 @@
 (deftype AnythingChecker []
   data/Diff
   (diff-similar [this other]
-    [nil nil other])
+    [nil nil (or other this)])
   data/EqualityPartition
   (equality-partition [_]
     shapes)
@@ -179,7 +178,8 @@
   (.write w "anything"))
 
 (defn close? [tolerance a b]
-  (< (Math/abs (double (- a b))) tolerance))
+  (< (Math/abs (double (- a b)))
+     tolerance))
 
 (deftype RoughlyChecker [n tolerance]
   data/Diff
@@ -188,7 +188,7 @@
       (assert (number? other) "`roughly` can ONLY be used against numbers!")
       (assert (number? tolerance) "<tolerance> MUST be a number!")
       (if (close? tolerance n other)
-        [nil nil other]
+        [nil nil (or other this)]
         [this other nil])))
   data/EqualityPartition
   (equality-partition [_]
@@ -210,13 +210,14 @@
 
 (deftype EveryChecker [checkers]
   data/Diff
-  (diff-similar [_ other]
+  (diff-similar [this other]
     (let [failed-diff (some (fn [checker]
                               (let [[a b both :as diff] (data/diff-similar checker other)]
-                                (when (seq a)
+                                (when (or (some? a)
+                                          (some? b))
                                   diff)))
                             checkers)]
-      (or failed-diff [nil nil other])))
+      (or failed-diff [nil nil (or other this)])))
   data/EqualityPartition
   (equality-partition [_]
     shapes)
@@ -240,7 +241,7 @@
   data/Diff
   (diff-similar [this other]
     (if (boolean other)
-      [nil nil other]
+      [nil nil (or other this)]
       [this other nil])
     )
   data/EqualityPartition
@@ -262,7 +263,7 @@
   data/Diff
   (diff-similar [this other]
     (if (not (boolean other))
-      [nil nil other]
+      [nil nil (or other this)]
       [this other nil])
     )
   data/EqualityPartition

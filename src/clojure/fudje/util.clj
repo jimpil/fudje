@@ -69,8 +69,8 @@
 (defn find-subset-in-any-order [other-partitions content]
   (->> content
        combi/permutations
-       (keep (partial find-subset other-partitions)) ;; this is hard! try out all possible permutations of <content> against all the all possible partitions of <other> - this code branch can be MUCH slower
-       first))
+       (some (partial find-subset other-partitions)) ;; this is hard! try out all possible permutations of <content> against all the all possible partitions of <other> - this code branch can be MUCH slower
+       ))
 
 (defn diff-sequential*
   "Helper for uncluttering the ContainsChecker code.
@@ -81,7 +81,9 @@
         [ignore-order? ignore-gaps?] ((juxt :in-any-order :gaps-ok) opts)]
     (if ignore-order?
       (if ignore-gaps?
-        (data/diff-similar (set content) (set other)) ;; this is easy - just use sets
+        (-> (set content)
+            (data/diff-similar (set other)) ;; this is easy - just use sets
+            (update 1 (constantly nil)))    ;; ignore any items in the :only-in-b slot (this is used by the `contains` checker only)
         (when (find-subset-in-any-order @other-partitions content)
           [nil nil content]))
       (if ignore-gaps?

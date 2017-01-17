@@ -35,8 +35,8 @@
                   [1 2 3])
       "Sequential collections can be marked with in-any-order")
 
-  (is (= [(contains [3 1 2 4] :in-any-order) [1 2 3] nil] (diff (contains [3 1 2 4] :in-any-order) [1 2 3]))
-      "if In-any-order fails then diffing falls back to vanilla sequential diffing")
+  (is (= [#{4} nil #{1 3 2}] (diff (contains [3 1 2 4] :in-any-order) [1 2 3]))
+      "if :in-any-order fails then diffing falls back to vanilla sequential diffing")
 
   (is (compatible (contains [1 2 3])
                   [4 1 2 3 6])
@@ -64,14 +64,14 @@
   (is (compatible (just {:a (checker pos?)}) {:a 1}) ;;custom checkers require the target shape
       "just supports inner checkers (as long as we're diffing maps)")
 
-  (is (= [(just [3 1 2] :in-any-order) #{4} #{1 3 2}] (diff (just [3 1 2] :in-any-order) [1 2 3 4]))
+  (is (= [nil #{4} #{1 3 2}] (diff (just [3 1 2] :in-any-order) [1 2 3 4]))
       "just complains on extra elements")
 
-  (is (= [(just {:a (n-of number? 2)}) {:b 2} {:a #{10 11}}] (diff (just {:a (n-of number? 2)}) {:a #{10 11} :b 2}))
+  (is (= [nil {:b 2} {:a #{10 11}}] (diff (just {:a (n-of number? 2)}) {:a #{10 11} :b 2}))
       "just complains on extra elements #2")
 
 
-  (is (= [(just {:a (checker vector?)}) {:b 2} {:a [1]}] (diff (just {:a (checker vector?)}) {:a [1] :b 2}))
+  (is (= [nil {:b 2} {:a [1]}] (diff (just {:a (checker vector?)}) {:a [1] :b 2}))
       "just complains on extra elements #3")
 
 
