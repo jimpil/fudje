@@ -1,5 +1,8 @@
 # fudje
-![fudge](https://www.bbcgoodfood.com/sites/default/files/styles/bbcgf_recipe/public/member-recipes/vanilla_fudge.jpg)
+
+<p align="center">
+  <img src="https://www.bbcgoodfood.com/sites/default/files/styles/bbcgf_recipe/public/member-recipes/vanilla_fudge.jpg"/>
+</p>
 
 ## What
 A tiny (~20kb jar) Clojure library designed to offer a helping hand when testing. For those familiar with [midje](https://github.com/marick/Midje), 
