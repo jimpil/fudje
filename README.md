@@ -25,7 +25,7 @@ This library will NOT be of any interest to you if:
 
 
 ## Where
-[![Clojars Project](https://img.shields.io/clojars/v/fudje.svg)](https://clojars.org/fudje) 
+[![Clojars Project](https://clojars.org/fudje/latest-version.svg)](https://clojars.org/fudje) 
 
 ## How
 
