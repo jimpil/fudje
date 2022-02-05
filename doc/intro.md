@@ -15,7 +15,7 @@ It looks like this:
 ```
 
 At first glance, it sort of syntactically resembles `clojure.core/binding` & `clojure.core/with-redefs`. As you probably guessed, there can be any number of mocks in mocking vector, and any number of assertions following it. But what exactly is a mock or an assertion? If you've ever seen or written tests using vanilla clojure.test, then you're already familiar with what assertions look like.
-In other words, fudje has no strong opinions regarding how you express your assertions. Your existing clojure.test assertions (based on `is` will work).
+In other words, fudje has no strong opinions regarding how you express your assertions. Your existing clojure.test assertions (based on `is`) will work.
 
 Let's look at a simplistic case...
 Assume for a minute that you don't need to do any mocking (which is perfectly valid btw). You could write something like this:
