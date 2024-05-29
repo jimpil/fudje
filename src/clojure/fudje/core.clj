@@ -36,7 +36,7 @@
 
 (defn arg-checking-wrapper [f original-mock-fn args-to-check group-no]
   (let [^AtomicLong mcounter (AtomicLong. 0)
-        groups? (when (> group-no 1) true)]
+        groups? (> group-no 1)]
     (bound-fn [& args]
       (if fudje.core/*report-mock-state*
         {:actual-calls (.get mcounter)
@@ -62,11 +62,10 @@
           (apply-mock (cond-> original-mock-fn ;; if there is a state-counter <mock-fn> is a list of values
                               groups? (nth curr-i)) vargs))))))
 
-(defmacro make-mocks [mock-forms]
-  `(let [triplets# (partition 3 ~mock-forms)
-         [mock-outs# mock-ins#] ((juxt (partial mapv first)
+(defmacro make-mocks [n mock-forms]
+  `(let [[mock-outs# mock-ins#] ((juxt (partial mapv first)
                                        (partial mapv last))
-                                  triplets#)
+                                 (partition ~n ~mock-forms))
          mocks# (->> mock-outs#
                      (map-indexed (fn [index# item#]
                                     (if (list? item#)  ;;extract the function from the expression
@@ -82,8 +81,21 @@
          resolved-syms# (->> mocks#
                              (take-nth 2)
                              (mapv (juxt identity resolve)))] ;;resolve them all before diving into syntax-quoting!
-     [mocks# resolved-syms#])
-  )
+     [mocks# resolved-syms#]))
+
+(defn- asserting-mock
+  [[mocks resolved-syms] & tests]
+  `(with-redefs ~(vec mocks)
+     (try ~@tests
+          (finally
+            (binding [fudje.core/*report-mock-state* true]
+              (doseq [[s# f#] '~resolved-syms]
+                (when-let [state# (when-not (-> s# meta :fudje.core/stateless) (f#))] ;; returns `{:actual-calls x, :expected-calls y}` OR nil
+                  (clojure.test/is (= (:expected-calls state#)
+                                      (:actual-calls state#))
+                                   (str "`" f# "`" " was NOT called the right number of times!")))))
+            ))
+     ))
 
 
 (defmacro mocking
@@ -107,7 +119,7 @@
 
   We can re-write this using vanilla `clojure.test` as so:
 
-  (testing \"testing `calcualte`\"
+  (testing \"testing `calculate`\"
     (mocking [(add 0 2) => (+ 0 2)
               (multiply 2 -4) => (* 2 -4)
               (divide 12 -4) => (/ 12 -4)
@@ -141,32 +153,32 @@
       (is (= :some-number (F 6)))
       (is (= :some-number (F 7))))) ;; calling F one more/less time will cause a test failure teling you that `six-times` was called less times than mocked
 
-  2)Mocking exeptions can ONLY be done via concrete Objects, whereas asserting that the tested function-call throws exception can be done via Class objects as well.
-   "
+  2)Mocking exceptions can ONLY be done via concrete Objects, whereas asserting that the tested function-call throws exception can be done via Class objects as well."
   [mock-forms & tests]
   (assert (zero? (rem (count mock-forms) 3)) "`mocking` expects a vector of triplets [& [mock-out => mock-in]]!")
-  (let [[mocks resolved-syms] (make-mocks mock-forms)]
-    `(with-redefs [~@mocks]
-       (try ~@tests
-            (finally
-              (binding [fudje.core/*report-mock-state* true]
-                (doseq [[s# f#] '~resolved-syms]
-                  (when-let [state# (when-not (-> s# meta :fudje.core/stateless) (f#))] ;; returns `{:actual-calls x, :expected-calls y}` OR nil
-                    (clojure.test/is (= (:expected-calls state#)
-                                        (:actual-calls state#))
-                                     (str "`" f# "`" " was NOT called the right number of times!")))))
-              ))
-       )))
+  (apply asserting-mock (make-mocks 3 mock-forms) tests))
 
+(defmacro let-mocks
+  "The same as `mocking`, but expecting pairs (instead of triplets) of mock-bindings,
+   so it looks closer to `let`, `binding` etc."
+  [mock-forms & tests]
+  (assert (even? (count mock-forms)) "`let-mocks` expects an even number of forms in its binding vector [& [mock-out mock-in]]!")
+  (apply asserting-mock (make-mocks 2 mock-forms) tests))
 
 (defmacro in-background
   "A thinner version of `mocking` which doesn't do any call-count checking.
   Intended as a replacement over midje's `against-background`."
   [mock-forms & body]
   (assert (zero? (rem (count mock-forms) 3)) "`in-background` expects a vector of triplets [& [mock-out => mock-in]]!")
-  (let [[mocks _] (make-mocks mock-forms)]
+  (let [[mocks _] (make-mocks 3 mock-forms)]
     `(with-redefs [~@mocks]
        ~@body)))
 
-
-
+(defmacro let-background
+  "A thinner version of `let-mocks` which doesn't do any call-count checking.
+  Intended as a replacement over midje's `against-background`."
+  [mock-forms & body]
+  ;  (assert (zero? (rem (count mock-forms) 3)) "`in-background` expects a vector of triplets [& [mock-out => mock-in]]!")
+  (let [[mocks _] (make-mocks 2 mock-forms)]
+    `(with-redefs [~@mocks]
+       ~@body)))
