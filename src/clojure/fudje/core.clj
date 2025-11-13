@@ -56,18 +56,19 @@
                                    (catch IndexOutOfBoundsException _
                                      ;;simply cause a test failure at this point
                                      (clojure.test/is false (str "`" f "`" " was called MORE times than mocked!"))))]
-          #_(assert (= (count vargs)
-                     (count (or relevant-arg-group [])))
-                  (str "Number of arguments between the mock-call and the actual function call don't match! Aborting ...\n**Mock-args: " relevant-arg-group "\n**Actual-args: " vargs))
+          (assert (= (count vargs)
+                     (count relevant-arg-group))
+                  (str "Number of arguments between the mock-call and the actual function call don't match! Aborting ..."
+                       \newline
+                       "**Mock-args: " (or relevant-arg-group [])
+                       \newline
+                       "**Actual-args: " vargs))
 
           ;; use our new assertion-expr with `is` as it was meant to be
-          (when (some? relevant-arg-group)
-            ;; no point failing here when we can't find a relevant arg-group
-            ;; let the mock produce nil, which will be caught by the outer assertion
-            (clojure.test/is (compatible relevant-arg-group vargs)
+          (clojure.test/is (compatible relevant-arg-group vargs)
                            (if groups?
                              (str "Function `" f "` (call " (inc curr-i) ") was called with unexpected arguments!")
-                             (str "Function `" f "` was called with unexpected arguments!"))))
+                             (str "Function `" f "` was called with unexpected arguments!")))
 
           (apply-mock
             (cond
