@@ -95,3 +95,12 @@
     (in-background [(plus anything 2) => (six-times 2)]
       (is (= 12  (times 2 2))))))
 
+(defn inc* [x] (inc x))
+
+(deftest parallel-multimock
+  (testing ":multimock/any-order"
+    (mocking [(^:multimock/any-order inc* [[0] [1] [2] [3]]) => [5 6 7 8]]
+      (is (= [5 6 7 8] (pmap inc* (range 4)))))
+    )
+  )
+

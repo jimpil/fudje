@@ -44,23 +44,42 @@
 
         (let [vargs (vec args)
               curr-i (.getAndIncrement mcounter)
-              relevant-arg-group (try (cond-> args-to-check  ;;only test the relevant arg-group, if there is a state-counter
-                                        groups? (nth curr-i))
-                                      (catch IndexOutOfBoundsException _
-                                        ;;simply cause a test failure at this point
-                                        (clojure.test/is false (str "`" f "`" " was called MORE times than mocked!"))))]
-          (assert (= (count vargs)
-                     (count relevant-arg-group))
+              relevant-arg-group (try
+                                   (cond   ;;only test the relevant arg-group, if there is a state-counter
+                                     (and groups? (sequential? args-to-check))
+                                     (nth args-to-check curr-i)
+
+                                     (and groups? (map? args-to-check))
+                                     (some #{vargs} (keys args-to-check))
+
+                                     :else args-to-check)
+                                   (catch IndexOutOfBoundsException _
+                                     ;;simply cause a test failure at this point
+                                     (clojure.test/is false (str "`" f "`" " was called MORE times than mocked!"))))]
+          #_(assert (= (count vargs)
+                     (count (or relevant-arg-group [])))
                   (str "Number of arguments between the mock-call and the actual function call don't match! Aborting ...\n**Mock-args: " relevant-arg-group "\n**Actual-args: " vargs))
 
           ;; use our new assertion-expr with `is` as it was meant to be
-          (clojure.test/is (compatible relevant-arg-group vargs)
+          (when (some? relevant-arg-group)
+            ;; no point failing here when we can't find a relevant arg-group
+            ;; let the mock produce nil, which will be caught by the outer assertion
+            (clojure.test/is (compatible relevant-arg-group vargs)
                            (if groups?
                              (str "Function `" f "` (call " (inc curr-i) ") was called with unexpected arguments!")
-                             (str "Function `" f "` was called with unexpected arguments!")))
+                             (str "Function `" f "` was called with unexpected arguments!"))))
 
-          (apply-mock (cond-> original-mock-fn ;; if there is a state-counter <mock-fn> is a list of values
-                              groups? (nth curr-i)) vargs))))))
+          (apply-mock
+            (cond
+              ;; if there is a state-counter <mock-fn> is a list of values
+              (and groups? (sequential? original-mock-fn))
+              (nth original-mock-fn curr-i)
+              ;; or it could be nil, and we received args-to-check as a map (see :multimock/any-order)
+              (and groups? (nil? original-mock-fn) (map? args-to-check))
+              (get args-to-check vargs)
+
+              :else original-mock-fn)
+            vargs))))))
 
 (defmacro make-mocks [n mock-forms]
   `(let [[mock-outs# mock-ins#] ((juxt (partial mapv first)
@@ -70,11 +89,20 @@
                      (map-indexed (fn [index# item#]
                                     (if (list? item#)  ;;extract the function from the expression
                                       (let [fsym# (first item#)
+                                            fsym-meta# (meta fsym#)
                                             rsym# (vec (next item#))]
-                                        (if (-> fsym# meta :multimock)
-                                          (let [arg-groups# (vec (second item#))
+                                        (cond
+                                          (:multimock fsym-meta#)
+                                          (let [arg-groups#  (vec (second item#))
                                                 group-count# (count arg-groups#)]
                                             [fsym# `(arg-checking-wrapper ~fsym# ~(nth mock-ins# index#) ~arg-groups# ~group-count#)])
+
+                                          (:multimock/any-order fsym-meta#)
+                                          (let [arg-groups#  (zipmap (second item#) (nth mock-ins# index#))
+                                                group-count# (count arg-groups#)]
+                                            [fsym# `(arg-checking-wrapper ~fsym# nil ~arg-groups# ~group-count#)])
+
+                                          :else
                                           [fsym# `(arg-checking-wrapper ~fsym# ~(nth mock-ins# index#) ~rsym# 1)]))
                                       [(with-meta item# {:fudje.core/stateless true}) (nth mock-ins# index#)])))
                      (apply concat))
