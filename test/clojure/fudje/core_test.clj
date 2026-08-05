@@ -54,8 +54,16 @@
     (mocking [(twice 2) => (Exception. "SOME EXCEPTION")]
       (is (= 30 (six-times 2))))) ;; Exception did fire and we got (* 10 3)
 
+  (testing "`mocking` macro mock throw expression case"
+    (mocking [(twice 2) => (throw (Exception. "SOME EXCEPTION"))]
+      (is (= 30 (six-times 2)))))
+
   (testing "`mocking` macro final Exception thrown case"
     (mocking [(six-times 5) => (Exception. "SOME EXCEPTION")]
+      (is (thrown? Exception (six-times 5)))))
+
+  (testing "`mocking` macro final Exception thrown case"
+    (mocking [(six-times 5) => (throw (Exception. "SOME EXCEPTION"))]
       (is (thrown? Exception (six-times 5)))))
 
   (testing "`mocking` with multi-mocks"

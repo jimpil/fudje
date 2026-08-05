@@ -6,7 +6,7 @@
   (:import [java.util.concurrent.atomic AtomicLong]))
 
 (def ^:dynamic *report-mock-state*  false)
-
+(def ^:dynamic *throw-exception-objects* true)
 ;======================================================================
 ;;extend what `clojure.test/is` recognises for our own benefit :)
 
@@ -28,7 +28,8 @@
 ;================================================================================================================
 
 (defn- apply-mock [mock args]
-  (let [mock-fn (if (ut/throwable? mock)
+  (let [mock-fn (if (and (ut/throwable? mock)
+                         *throw-exception-objects*)
                   (fn [& _] (throw mock))
                   mock)]
     (cond-> mock-fn
@@ -62,10 +63,18 @@
           (apply-mock (cond-> original-mock-fn ;; if there is a state-counter <mock-fn> is a list of values
                               groups? (nth curr-i)) vargs))))))
 
+(def all-first+last
+  (juxt (partial mapv first)
+        (partial mapv last)))
+
 (defmacro make-mocks [n mock-forms]
-  `(let [[mock-outs# mock-ins#] ((juxt (partial mapv first)
-                                       (partial mapv last))
-                                 (partition ~n ~mock-forms))
+  `(let [[mock-outs# mock-ins#] (->> (for [mf# ~mock-forms]
+                                       (if (and (list? mf#)
+                                                (= 'throw (first mf#)))
+                                         `(fn [& ~'~'_] ~mf#)
+                                         mf#))
+                                     (partition ~n)
+                                     all-first+last)
          mocks# (->> mock-outs#
                      (map-indexed (fn [index# item#]
                                     (if (list? item#)  ;;extract the function from the expression

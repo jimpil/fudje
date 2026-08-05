@@ -162,6 +162,16 @@ Please have a look at the test checkers-test.clj namespace for more demo usage.
 
 We're done! You now know how to use fudje!
 
+### Exceptions 
+Up to version 0.9.8, if you provided an Exception object as a mock-in, `fudje` would (implicitly) turn it into 
+a function that threw the Exception provided. Although convenient for the majority of cases, it meant that 
+functions returning Exceptions (NOT throwing them) could not be mocked!
+
+Version 0.9.9 changes that, and adds support for `(throw ...)` expressions as mock-ins. 
+The default behaviour for exception objects stays the same - i.e. they are implicitly thrown.
+However, this now depends on `fudje.core/*throw-exception-objects*`, and setting it to false enables mixing of 
+throwing VS returning where applicable.
+
 ### Migrating existing midje facts
 
 Fudje is able to automatically rewrite a **well-formed** midje fact, via its own `fact` macro, so, in theory, you should be able to get rid of the midje dependency of a project, by simply replacing `midje.sweet` => `fudje.sweet` in all its test ns declarations. Now, why 'well-formed' and why 'in-theory'? Let's first look at what constitutes a 'well-formed' midje fact (according to fudje). Here is one:
