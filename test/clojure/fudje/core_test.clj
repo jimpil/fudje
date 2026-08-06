@@ -73,6 +73,10 @@
       (is (= 25 (six-times 5)))
       (is (= 10 (times 3 3)))))
 
+  (testing "throw expression in a multimock"
+    (mocking [(^:multimock plus [[0 3] [3 3] [6 3]]) => [3 6 (throw (Exception. "SOME EXCEPTION"))] ;;wrong on purpose]
+      (is (thrown? Exception (times 3 3)))))
+
   (testing "`mocking` with nested checkers works"
     (mocking [(six-times (just {:a (contains [2 3]) :b (has every? keyword?)})) => :some-number] ;; could have used `checker` instead of `has`
       (is (compatible :some-number (six-times {:a [1 2 3 4] :b #{:x :y :z}})))))

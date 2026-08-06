@@ -2,7 +2,8 @@
   (:require [fudje
              [data :as data]
              [util :as ut]]
-            [clojure.test :as test])
+            [clojure.test :as test]
+            [clojure.walk :as walk])
   (:import [java.util.concurrent.atomic AtomicLong]))
 
 (def ^:dynamic *report-mock-state*  false)
@@ -43,7 +44,7 @@
         {:actual-calls (.get mcounter)
          :expected-calls group-no}
 
-        (let [vargs (vec args)
+        (let [vargs  (vec args)
               curr-i (.getAndIncrement mcounter)
               relevant-arg-group (try (cond-> args-to-check  ;;only test the relevant arg-group, if there is a state-counter
                                         groups? (nth curr-i))
@@ -68,13 +69,18 @@
         (partial mapv last)))
 
 (defmacro make-mocks [n mock-forms]
-  `(let [[mock-outs# mock-ins#] (->> (for [mf# ~mock-forms]
-                                       (if (and (list? mf#)
-                                                (= 'throw (first mf#)))
-                                         `(fn [& ~'~'_] ~mf#)
-                                         mf#))
+  `(let [[mock-outs# mock-ins#] (->> ~mock-forms
                                      (partition ~n)
                                      all-first+last)
+         ;; find `throw` expressions early, and turn them
+         ;; into functions so that they can be evaluated safely
+         mock-ins-safe# (walk/postwalk
+                          (fn [form#]
+                            (if (and (list? form#)
+                                     (= 'throw (first form#)))
+                              `(fn [& ~'~'_] ~form#)
+                              form#))
+                          mock-ins#)
          mocks# (->> mock-outs#
                      (map-indexed (fn [index# item#]
                                     (if (list? item#)  ;;extract the function from the expression
@@ -83,9 +89,9 @@
                                         (if (-> fsym# meta :multimock)
                                           (let [arg-groups# (vec (second item#))
                                                 group-count# (count arg-groups#)]
-                                            [fsym# `(arg-checking-wrapper ~fsym# ~(nth mock-ins# index#) ~arg-groups# ~group-count#)])
-                                          [fsym# `(arg-checking-wrapper ~fsym# ~(nth mock-ins# index#) ~rsym# 1)]))
-                                      [(with-meta item# {:fudje.core/stateless true}) (nth mock-ins# index#)])))
+                                            [fsym# `(arg-checking-wrapper ~fsym# ~(nth mock-ins-safe# index#) ~arg-groups# ~group-count#)])
+                                          [fsym# `(arg-checking-wrapper ~fsym# ~(nth mock-ins-safe# index#) ~rsym# 1)]))
+                                      [(with-meta item# {:fudje.core/stateless true}) (nth mock-ins-safe# index#)])))
                      (apply concat))
          resolved-syms# (->> mocks#
                              (take-nth 2)
