@@ -1,0 +1,9 @@
+{:paths ["src/clojure"]
+ :deps {org.clojure/clojure          {:mvn/version "1.12.5"}
+        org.clojure/tools.cli        {:mvn/version "1.4.256"}
+        org.clojure/tools.namespace  {:mvn/version "1.5.1"}
+        org.clojure/math.combinatorics {:mvn/version "0.3.2"
+                                        :exclusions [org.clojure/clojure]}}
+ :aliases
+ {:runner {:main-opts ["-m" "fudje.runner"]}
+  :test   {:extra-paths ["test/clojure"]}}}

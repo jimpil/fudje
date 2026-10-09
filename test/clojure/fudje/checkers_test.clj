@@ -114,9 +114,4 @@
   (let [x 3.5 t 1]
     (is (compatible (roughly x t) 3.8)
       "roughly checker works"))
-
-
-
-
-
-                  )
+  )

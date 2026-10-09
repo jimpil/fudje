@@ -74,7 +74,7 @@
       (is (= 10 (times 3 3)))))
 
   (testing "throw expression in a multimock"
-    (mocking [(^:multimock plus [[0 3] [3 3] [6 3]]) => [3 6 (throw (Exception. "SOME EXCEPTION"))] ;;wrong on purpose]
+    (mocking [(^:multimock plus [[0 3] [3 3] [6 3]]) => [3 6 (throw (Exception. "SOME EXCEPTION"))]] ;;wrong on purpose
       (is (thrown? Exception (times 3 3)))))
 
   (testing "`mocking` with nested checkers works"
